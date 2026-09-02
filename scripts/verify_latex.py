@@ -16,7 +16,13 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 
 # 正文不允许残留的 Unicode 数学字符（代码块/行内代码/图片 alt 中豁免）
-BANNED = set("×·≈≠≤≥√∑∏λθαβγεΣΠΔ¹²³⁰ᵀ⁻½⅓⅔¼₁₂⇔−")
+# 注意：间隔号 "·" 不在此列 —— 它单独检查：夹在两个 CJK 字符之间视为中文人名
+# 标点（如"格雷厄姆·多德"）放行；其余位置（数学语境）一律要求改写为 \cdot。
+BANNED = set("×≈≠≤≥√∑∏λθαβγεΣΠΔ¹²³⁰ᵀ⁻½⅓⅔¼₁₂⇔−")
+
+
+def is_cjk(ch: str) -> bool:
+    return "\u4e00" <= ch <= "\u9fff"
 
 
 def strip_protected(text: str) -> str:
@@ -81,8 +87,18 @@ def check_file(path: pathlib.Path) -> list:
 
     # Unicode 数学字符残留
     leftover = sorted({c for c in prose if c in BANNED})
+
+    # 间隔号 "·"：两侧都是 CJK 才算人名标点放行，否则按数学点乘处理（要求 \cdot）
+    for i, ch in enumerate(prose):
+        if ch == "·":
+            prev_ok = i > 0 and is_cjk(prose[i - 1])
+            next_ok = i + 1 < len(prose) and is_cjk(prose[i + 1])
+            if not (prev_ok and next_ok):
+                leftover.append("·")
+                break
+
     if leftover:
-        problems.append(f"  残留 Unicode 数学字符：{''.join(leftover)}")
+        problems.append(f"  残留 Unicode 数学字符：{''.join(sorted(set(leftover)))}")
 
     return problems
 
