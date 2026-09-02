@@ -1,0 +1,10 @@
+[book]
+title = "读懂《证券分析》：十周吃透价值投资圣经"
+authors = ["为你定制的学习教程"]
+language = "zh-CN"
+src = "."
+
+[output.html]
+default-theme = "light"
+preferred-dark-theme = "navy"
+smart-punctuation = true
