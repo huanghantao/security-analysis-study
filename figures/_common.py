@@ -65,7 +65,12 @@ def fig_ax(width=10, height=6):
 
 
 def fig_multi(rows, cols, width=12, height=6):
-    """新建多子图画布，返回 (fig, axes)。axes 为按行展平的列表。"""
+    """新建多子图画布，返回 (fig, axes)。axes 为按行展平的列表。
+
+    ⚠️ 与 fig_ax 不同：本函数**不会**自动设置 xlim/ylim（matplotlib 默认 0~1），
+    也不会把 aspect 设为 equal。用每个子图前先手动 ax.set_xlim(...) / ax.set_ylim(...)，
+    或对概念图直接 set_xlim(0, 10); set_ylim(0, 10) 与 fig_ax 保持一致。
+    """
     fig, axes = plt.subplots(rows, cols, figsize=(width, height))
     flat = list(axes.flat) if hasattr(axes, "flat") else [axes]
     for ax in flat:
